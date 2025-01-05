@@ -1,0 +1,19 @@
+name: Build and Publish image to Docker Hub
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  publish_images:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+      - name: build image
+        run: |
+          docker build . --file Dockerfile -t kohlhaas1808/fluxgym:latest
+      - name: push image to docker hub
+        run: |
+          docker login -u kohlhaas1808 -p ${{ secrets.DOCKER_HUB_TOKEN }}
+          docker push kohlhaas1808/fluxgym:latest
