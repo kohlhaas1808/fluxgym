@@ -40,7 +40,7 @@ RUN curl -L -o /models/clip/clip_l.safetensors https://huggingface.co/comfyanony
     curl -L -o /models/unet/flux1-dev.sft https://huggingface.co/cocktailpeanut/xulf-dev/resolve/main/flux1-dev.sft
 
 # Expose ports for JupyterLab and the app
-EXPOSE 8080 8888
+EXPOSE 7860 8888
 
 # Start JupyterLab and the app
 CMD ["/bin/bash", "-c", "source env/bin/activate && jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --allow-root & python app.py"]
