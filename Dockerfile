@@ -1,58 +1,46 @@
-# Base image with CUDA 12.2
+# Use the NVIDIA CUDA base image
 FROM nvidia/cuda:12.2.2-base-ubuntu22.04
 
-# Install pip if not already installed
-RUN apt-get update -y && apt-get install -y \
-    python3-pip \
-    python3-dev \
+# Set the working directory in the container
+WORKDIR /fluxgym
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
-    build-essential  # Install dependencies for building extensions
+    python3 \
+    python3-venv \
+    python3-pip \
+    curl \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
-# Define environment variables for UID and GID and local timezone
-ENV PUID=${PUID:-1000}
-ENV PGID=${PGID:-1000}
+# Clone the necessary repositories
+RUN git clone https://github.com/cocktailpeanut/fluxgym . \
+    && git clone -b sd3 https://github.com/kohya-ss/sd-scripts sd-scripts
 
-# Create a group with the specified GID
-RUN groupadd -g "${PGID}" appuser
-# Create a user with the specified UID and GID
-RUN useradd -m -s /bin/sh -u "${PUID}" -g "${PGID}" appuser
+# Create and activate the virtual environment
+RUN python3 -m venv env && \
+    /bin/bash -c "source env/bin/activate && pip install --upgrade pip"
 
-WORKDIR /app
+# Install dependencies for sd-scripts, Fluxgym, and JupyterLab
+RUN /bin/bash -c "source env/bin/activate && \
+    pip install -r requirements.txt && \
+    cd sd-scripts && pip install -r requirements.txt && \
+    cd .. && \
+    pip install --pre torch torchvision torchaudio --index-url https://download.pytorch.org/whl/nightly/cu121 && \
+    pip install jupyterlab"
 
-# Get sd-scripts from kohya-ss and install them
-RUN git clone -b sd3 https://github.com/kohya-ss/sd-scripts && \
-    cd sd-scripts && \
-    pip install --no-cache-dir -r ./requirements.txt
+# Create directories for models
+RUN mkdir -p /models/clip /models/vae /models/unet /outputs
 
-# Install main application dependencies
-COPY ./requirements.txt ./requirements.txt
-RUN pip install --no-cache-dir -r ./requirements.txt
+# Download model checkpoints
+RUN curl -L -o /models/clip/clip_l.safetensors https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/clip_l.safetensors && \
+    curl -L -o /models/clip/t5xxl_fp16.safetensors https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/t5xxl_fp16.safetensors && \
+    curl -L -o /models/vae/ae.sft https://huggingface.co/cocktailpeanut/xulf-dev/resolve/main/ae.sft && \
+    curl -L -o /models/unet/flux1-dev.sft https://huggingface.co/cocktailpeanut/xulf-dev/resolve/main/flux1-dev.sft
 
-# Install Torch, Torchvision, and Torchaudio for CUDA 12.2
-RUN pip install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu122/torch_stable.html
+# Expose ports for JupyterLab and the app
+EXPOSE 8080 8888
 
-# Install JupyterLab
-RUN pip install jupyterlab
-
-RUN chown -R appuser:appuser /app
-
-# delete redundant requirements.txt and sd-scripts directory within the container
-RUN rm -r ./sd-scripts
-RUN rm ./requirements.txt
-
-# Expose ports for applications
-EXPOSE 7860
-EXPOSE 8888
-
-#Run application as non-root
-USER appuser
-
-# Copy fluxgym application code
-COPY . ./fluxgym
-
-ENV GRADIO_SERVER_NAME="0.0.0.0"
-
-WORKDIR /app/fluxgym
-
-# Run JupyterLab and fluxgym Python application
-CMD ["bash", "-c", "jupyter-lab --ip=0.0.0.0 --port=8888 --no-browser --allow-root & python3 .app.py"]
+# Start JupyterLab and the app
+CMD ["/bin/bash", "-c", "source env/bin/activate && jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --allow-root & python app.py"]
