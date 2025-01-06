@@ -34,7 +34,7 @@ RUN /bin/bash -c "source env/bin/activate && \
 RUN mkdir -p /models/clip /models/vae /models/unet /outputs
 
 # Expose ports for JupyterLab and the app
-EXPOSE 8080 8888
+EXPOSE 7860 8888
 
 # Start JupyterLab and the app
 CMD ["/bin/bash", "-c", "source env/bin/activate && \
