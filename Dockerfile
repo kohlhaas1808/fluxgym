@@ -14,12 +14,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
+# Add alias for python -> python3
+RUN ln -s /usr/bin/python3 /usr/bin/python
+
 # Clone the necessary repositories
 RUN git clone https://github.com/cocktailpeanut/fluxgym . \
     && git clone -b sd3 https://github.com/kohya-ss/sd-scripts sd-scripts
 
 # Create and activate the virtual environment
-RUN python3 -m venv env && \
+RUN python -m venv env && \
     /bin/bash -c "source env/bin/activate && pip install --upgrade pip"
 
 # Install dependencies for sd-scripts, Fluxgym, and JupyterLab
