@@ -29,12 +29,12 @@ RUN git clone https://github.com/cocktailpeanut/fluxgym fluxgym && \
 
 # Create the virtual environment and install dependencies
 RUN cd fluxgym && \
-    python -m venv env && \
+    #python -m venv env && \
     cd sd-scripts && \
-    /workspace/fluxgym/env/bin/pip install --no-cache-dir -r requirements.txt && \
+    pip install --no-cache-dir -r requirements.txt && \
     cd .. && \
-    /workspace/fluxgym/env/bin/pip install --no-cache-dir -r requirements.txt && \
-    /workspace/fluxgym/env/bin/pip install --no-cache-dir --pre torch torchvision torchaudio --index-url https://download.pytorch.org/whl/nightly/cu121
+    pip install --no-cache-dir -r requirements.txt && \
+    pip install --no-cache-dir --pre torch torchvision torchaudio --index-url https://download.pytorch.org/whl/nightly/cu121
 
 # Create directories for models
 RUN mkdir -p fluxgym/models/clip fluxgym/models/vae fluxgym/models/unet fluxgym/outputs
@@ -45,7 +45,7 @@ EXPOSE 7860 8888
 
 ENV GRADIO_SERVER_NAME="0.0.0.0"
 
-WORKDIR /workspace/fluxgym
+#WORKDIR /workspace/fluxgym
 
 COPY start.sh /workspace/start.sh
 RUN chmod +x /workspace/start.sh
