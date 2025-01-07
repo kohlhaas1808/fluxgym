@@ -45,8 +45,6 @@ EXPOSE 7860 8888
 
 ENV GRADIO_SERVER_NAME="0.0.0.0"
 
-#WORKDIR /workspace/fluxgym
-
 COPY start.sh /workspace/start.sh
 RUN chmod +x /workspace/start.sh
 CMD ["/bin/bash", "/workspace/start.sh"]

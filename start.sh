@@ -11,4 +11,4 @@ cd fluxgym
 
 # Start JupyterLab and the app
 jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --allow-root &
-env/bin/python app.py
+python app.py
