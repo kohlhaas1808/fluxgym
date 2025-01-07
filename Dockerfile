@@ -17,6 +17,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Add alias for python -> python3
 RUN ln -s /usr/bin/python3 /usr/bin/python
 
+# Add Jupyter Notebook
+RUN pip install jupyterlab
+
 # Clone the necessary repositories
 RUN git clone https://github.com/cocktailpeanut/fluxgym fluxgym && \
     cd fluxgym && \
@@ -36,6 +39,9 @@ RUN mkdir -p fluxgym/models/clip fluxgym/models/vae fluxgym/models/unet fluxgym/
 
 # Expose ports for JupyterLab and the app
 EXPOSE 7860 8888
+
+ENV GRADIO_SERVER_NAME="0.0.0.0"
+
 
 COPY start.sh /workspace/start.sh
 RUN chmod +x /workspace/start.sh
