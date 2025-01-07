@@ -2,7 +2,7 @@
 FROM nvidia/cuda:12.2.2-base-ubuntu22.04
 
 # Set the working directory in the container
-WORKDIR /fluxgym
+WORKDIR /workspace
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -17,16 +17,16 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Add alias for python -> python3
 RUN ln -s /usr/bin/python3 /usr/bin/python
 
-# Clone the necessary repositories
-RUN git clone https://github.com/cocktailpeanut/fluxgym . \
-    && git clone -b sd3 https://github.com/kohya-ss/sd-scripts sd-scripts
+# # Clone the necessary repositories
+# RUN git clone https://github.com/cocktailpeanut/fluxgym . \
+#     && git clone -b sd3 https://github.com/kohya-ss/sd-scripts sd-scripts
 
 # Install dependencies for sd-scripts, Fluxgym, and JupyterLab
-RUN pip install --upgrade pip && \
-    pip install -r requirements.txt && \
-    cd sd-scripts && pip install -r requirements.txt && \
-    cd .. && \
-    pip install --pre torch torchvision torchaudio --index-url https://download.pytorch.org/whl/nightly/cu121 && \
+# RUN pip install --upgrade pip && \
+#     pip install -r requirements.txt && \
+#     cd sd-scripts && pip install -r requirements.txt && \
+#     cd .. && \
+RUN pip install --pre torch torchvision torchaudio --index-url https://download.pytorch.org/whl/nightly/cu121 && \
     pip install jupyterlab
 
 # Create directories for models
@@ -36,8 +36,4 @@ RUN mkdir -p /models/clip /models/vae /models/unet /outputs
 EXPOSE 7860 8888
 
 # Start JupyterLab and the app
-CMD ["/bin/bash", "-c", "curl -L -o /models/clip/clip_l.safetensors https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/clip_l.safetensors && \
-    curl -L -o /models/clip/t5xxl_fp16.safetensors https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/t5xxl_fp16.safetensors && \
-    curl -L -o /models/vae/ae.sft https://huggingface.co/cocktailpeanut/xulf-dev/resolve/main/ae.sft && \
-    curl -L -o /models/unet/flux1-dev.sft https://huggingface.co/cocktailpeanut/xulf-dev/resolve/main/flux1-dev.sft && \
-    jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --allow-root & python app.py"]
+CMD ["/bin/bash", "-c", "jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --allow-root"]
