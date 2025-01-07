@@ -15,15 +15,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Define environment variables for UID and GID and local timezone
-ENV PUID=${PUID:-1000}
-ENV PGID=${PGID:-1000}
-
-# Create a group with the specified GID
-RUN groupadd -g "${PGID}" appuser
-# Create a user with the specified UID and GID
-RUN useradd -m -s /bin/sh -u "${PUID}" -g "${PGID}" appuser
-
 
 # Add alias for python -> python3
 RUN ln -s /usr/bin/python3 /usr/bin/python
@@ -49,16 +40,10 @@ RUN cd fluxgym && \
 RUN mkdir -p fluxgym/models/clip fluxgym/models/vae fluxgym/models/unet fluxgym/outputs
 
 
-RUN chown -R appuser:appuser /workspace
-
-#Run application as non-root
-USER appuser
-
 # Expose ports for JupyterLab and the app
 EXPOSE 7860 8888
 
 ENV GRADIO_SERVER_NAME="0.0.0.0"
-
 
 COPY start.sh /workspace/start.sh
 RUN chmod +x /workspace/start.sh
