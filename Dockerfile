@@ -20,16 +20,20 @@ RUN ln -s /usr/bin/python3 /usr/bin/python
 # Clone the necessary repositories
 RUN mkdir -p fluxgym && \
     git clone https://github.com/cocktailpeanut/fluxgym fluxgym && \
-    git clone -b sd3 https://github.com/kohya-ss/sd-scripts fluxgym/sd-scripts
+    cd fluxgym && git clone -b sd3 https://github.com/kohya-ss/sd-scripts sd-scripts
 
 # Create and activate the virtual environment in fluxgym
-RUN python3 -m venv fluxgym/env && \
-    fluxgym/env/bin/python -m pip install --upgrade pip
+RUN cd fluxgym && \
+    python -m venv env && \
+    source env/bin/activate && \
+    pip install --upgrade pip
 
 # Install dependencies for sd-scripts, Fluxgym, and Torch
-RUN fluxgym/env/bin/python -m pip install -r fluxgym/sd-scripts/requirements.txt && \
-    fluxgym/env/bin/python -m pip install -r fluxgym/requirements.txt && \
-    fluxgym/env/bin/python -m pip install --pre torch torchvision torchaudio --index-url https://download.pytorch.org/whl/nightly/cu121
+RUN cd fluxgym && \
+    source env/bin/activate && \
+    pip install -r sd-scripts/requirements.txt && \
+    pip install -r requirements.txt && \
+    pip install --pre torch torchvision torchaudio --index-url https://download.pytorch.org/whl/nightly/cu121
 
 # Create directories for models
 RUN mkdir -p fluxgym/models/clip fluxgym/models/vae fluxgym/models/unet fluxgym/outputs
@@ -38,10 +42,10 @@ RUN mkdir -p fluxgym/models/clip fluxgym/models/vae fluxgym/models/unet fluxgym/
 EXPOSE 7860 8888
 
 # Start JupyterLab and the app
-CMD ["/bin/bash", "-c", "source fluxgym/env/bin/activate && \
-    curl -L -o fluxgym/models/clip/clip_l.safetensors https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/clip_l.safetensors && \
-    curl -L -o fluxgym/models/clip/t5xxl_fp16.safetensors https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/t5xxl_fp16.safetensors && \
-    curl -L -o fluxgym/models/vae/ae.sft https://huggingface.co/cocktailpeanut/xulf-dev/resolve/main/ae.sft && \
-    curl -L -o fluxgym/models/unet/flux1-dev.sft https://huggingface.co/cocktailpeanut/xulf-dev/resolve/main/flux1-dev.sft && \
-    jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --allow-root & fluxgym/env/bin/python fluxgym/app.py"]
+CMD ["/bin/bash", "-c", "cd fluxgym && source env/bin/activate && \
+    curl -L -o models/clip/clip_l.safetensors https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/clip_l.safetensors && \
+    curl -L -o models/clip/t5xxl_fp16.safetensors https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/t5xxl_fp16.safetensors && \
+    curl -L -o models/vae/ae.sft https://huggingface.co/cocktailpeanut/xulf-dev/resolve/main/ae.sft && \
+    curl -L -o models/unet/flux1-dev.sft https://huggingface.co/cocktailpeanut/xulf-dev/resolve/main/flux1-dev.sft && \
+    jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --allow-root & python app.py"]
     
