@@ -25,13 +25,12 @@ RUN git clone https://github.com/cocktailpeanut/fluxgym fluxgym && \
 # Create the virtual environment and install dependencies
 RUN cd fluxgym && \
     python -m venv env && \
-    env/bin/python -m pip install --upgrade pip && \
-    env/bin/python -m pip install --no-cache-dir -r sd-scripts/requirements.txt && \
-    env/bin/python -m pip install --no-cache-dir -r requirements.txt
-
-# Install Torch with CUDA support
-RUN cd fluxgym && \
-    env/bin/python -m pip install --no-cache-dir --pre torch torchvision torchaudio --index-url https://download.pytorch.org/whl/nightly/cu121
+    source env/bin/activate && \
+    cd sd-scripts
+    python pip install --no-cache-dir -r requirements.txt && \
+    cd .. && \
+    python pip install --no-cache-dir -r requirements.txt && \
+    python -m pip install --no-cache-dir --pre torch torchvision torchaudio --index-url https://download.pytorch.org/whl/nightly/cu121
 
 # Create directories for models
 RUN mkdir -p fluxgym/models/clip fluxgym/models/vae fluxgym/models/unet fluxgym/outputs
