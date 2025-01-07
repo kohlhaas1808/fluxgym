@@ -18,7 +18,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN ln -s /usr/bin/python3 /usr/bin/python
 
 # Clone the necessary repositories
-RUN git clone https://github.com/cocktailpeanut/fluxgym && \
+RUN git clone https://github.com/cocktailpeanut/fluxgym fluxgym && \
     cd fluxgym && \
     git clone -b sd3 https://github.com/kohya-ss/sd-scripts sd-scripts
 
