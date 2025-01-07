@@ -22,18 +22,16 @@ RUN mkdir -p fluxgym && \
     git clone https://github.com/cocktailpeanut/fluxgym fluxgym && \
     cd fluxgym && git clone -b sd3 https://github.com/kohya-ss/sd-scripts sd-scripts
 
-# Create and activate the virtual environment in fluxgym
+# Create the virtual environment in fluxgym
 RUN cd fluxgym && \
     python -m venv env && \
-    source env/bin/activate && \
-    pip install --upgrade pip
+    env/bin/python -m pip install --upgrade pip
 
 # Install dependencies for sd-scripts, Fluxgym, and Torch
 RUN cd fluxgym && \
-    source env/bin/activate && \
-    pip install -r sd-scripts/requirements.txt && \
-    pip install -r requirements.txt && \
-    pip install --pre torch torchvision torchaudio --index-url https://download.pytorch.org/whl/nightly/cu121
+    env/bin/python -m pip install -r sd-scripts/requirements.txt && \
+    env/bin/python -m pip install -r requirements.txt && \
+    env/bin/python -m pip install --pre torch torchvision torchaudio --index-url https://download.pytorch.org/whl/nightly/cu121
 
 # Create directories for models
 RUN mkdir -p fluxgym/models/clip fluxgym/models/vae fluxgym/models/unet fluxgym/outputs
@@ -42,10 +40,9 @@ RUN mkdir -p fluxgym/models/clip fluxgym/models/vae fluxgym/models/unet fluxgym/
 EXPOSE 7860 8888
 
 # Start JupyterLab and the app
-CMD ["/bin/bash", "-c", "cd fluxgym && source env/bin/activate && \
+CMD ["/bin/bash", "-c", "cd fluxgym && env/bin/python -m pip install --upgrade pip && \
     curl -L -o models/clip/clip_l.safetensors https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/clip_l.safetensors && \
     curl -L -o models/clip/t5xxl_fp16.safetensors https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/t5xxl_fp16.safetensors && \
     curl -L -o models/vae/ae.sft https://huggingface.co/cocktailpeanut/xulf-dev/resolve/main/ae.sft && \
     curl -L -o models/unet/flux1-dev.sft https://huggingface.co/cocktailpeanut/xulf-dev/resolve/main/flux1-dev.sft && \
-    jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --allow-root & python app.py"]
-    
+    jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --allow-root & env/bin/python app.py"]
